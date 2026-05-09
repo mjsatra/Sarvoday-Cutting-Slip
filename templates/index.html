@@ -77,6 +77,86 @@
 <body>
 
 <div class="header">
+    <div style="
+        display:grid;
+        grid-template-columns:repeat(5, 1fr);
+        gap:8px;
+        padding:10px;
+        background:white;
+        border-bottom:1px solid #ddd;
+    ">
+
+        <button type="button"
+                onclick="openPartyPopup()"
+                style="
+                    background:#3498db;
+                    color:white;
+                    border:none;
+                    padding:10px;
+                    border-radius:8px;
+                    font-weight:bold;
+                    font-size:12px;
+                ">
+            ➕ Party
+        </button>
+
+        <button type="button"
+                onclick="openClothPopup()"
+                style="
+                    background:#27ae60;
+                    color:white;
+                    border:none;
+                    padding:10px;
+                    border-radius:8px;
+                    font-weight:bold;
+                    font-size:12px;
+                ">
+            ➕ Cloth
+        </button>
+
+        <button type="button"
+                onclick="openSchoolPopup()"
+                style="
+                    background:#e67e22;
+                    color:white;
+                    border:none;
+                    padding:10px;
+                    border-radius:8px;
+                    font-weight:bold;
+                    font-size:12px;
+                ">
+            ➕ School
+        </button>
+
+        <button type="button"
+                onclick="openItemPopup()"
+                style="
+                    background:#8e44ad;
+                    color:white;
+                    border:none;
+                    padding:10px;
+                    border-radius:8px;
+                    font-weight:bold;
+                    font-size:12px;
+                ">
+            ➕ Item
+        </button>
+
+        <button type="button"
+                onclick="toggleHistory()"
+                style="
+                    background:#2c3e50;
+                    color:white;
+                    border:none;
+                    padding:10px;
+                    border-radius:8px;
+                    font-weight:bold;
+                    font-size:12px;
+                ">
+            📋 History
+        </button>
+
+    </div>
     ✂ SARVODAY STORES - Cutting Slip
 </div>
 
@@ -272,6 +352,7 @@
 
     <div class="history"
         style="
+            display:none;
             position:fixed;
             right:10px;
             top:80px;
@@ -983,5 +1064,361 @@
 
         <button onclick="closePopup()">Close</button>
     </div>
+
+    <script>
+
+    function openPartyPopup(){
+
+        document.getElementById("partyPopup").style.display = "block";
+    }
+
+    function closePartyPopup(){
+
+        document.getElementById("partyPopup").style.display = "none";
+    }
+
+    async function saveParty(){
+
+        let name =
+            document.getElementById("newPartyName").value;
+
+        let address =
+            document.getElementById("newPartyAddress").value;
+
+        if(name === ""){
+            alert("Enter Party Name");
+            return;
+        }
+
+        let response = await fetch("/save_party", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+                party: name,
+                address: address
+            })
+        });
+
+        let result = await response.json();
+
+        if(result.status === "success"){
+
+            alert("Party Saved");
+
+            closePartyPopup();
+
+            location.reload();
+        }
+    }
+
+    function openClothPopup(){
+
+        document.getElementById("clothPopup").style.display = "block";
+    }
+
+    function closeClothPopup(){
+
+        document.getElementById("clothPopup").style.display = "none";
+    }
+
+    async function saveCloth(){
+
+        let cloth =
+            document.getElementById("newCloth").value;
+
+        if(cloth === ""){
+            alert("Enter Cloth Name");
+            return;
+        }
+
+        let response = await fetch("/save_cloth", {
+
+            method:"POST",
+
+            headers:{
+                "Content-Type":"application/json"
+            },
+
+            body:JSON.stringify({
+                cloth: cloth
+            })
+        });
+
+        let result = await response.json();
+
+        if(result.status === "success"){
+
+            alert("Cloth Saved");
+
+            closeClothPopup();
+
+            location.reload();
+        }
+    }
+
+    function openSchoolPopup(){
+
+        document.getElementById("schoolPopup").style.display = "block";
+    }
+
+    function closeSchoolPopup(){
+
+        document.getElementById("schoolPopup").style.display = "none";
+    }
+
+    async function saveSchool(){
+
+        let school =
+            document.getElementById("newSchool").value;
+
+        if(school === ""){
+            alert("Enter School Name");
+            return;
+        }
+
+        let response = await fetch("/save_school", {
+
+            method:"POST",
+
+            headers:{
+                "Content-Type":"application/json"
+            },
+
+            body:JSON.stringify({
+                school: school
+            })
+        });
+
+        let result = await response.json();
+
+        if(result.status === "success"){
+
+            alert("School Saved");
+
+            closeSchoolPopup();
+
+            location.reload();
+        }
+    }
+
+    function openItemPopup(){
+
+        document.getElementById("itemPopup").style.display = "block";
+    }
+
+    function closeItemPopup(){
+
+        document.getElementById("itemPopup").style.display = "none";
+    }
+
+    async function saveItem(){
+
+        let item =
+            document.getElementById("newItem").value;
+
+        let sizes =
+            document.getElementById("newSizes").value;
+
+        if(item === ""){
+            alert("Enter Item Name");
+            return;
+        }
+
+        let response = await fetch("/save_item", {
+
+            method:"POST",
+
+            headers:{
+                "Content-Type":"application/json"
+            },
+
+            body:JSON.stringify({
+                item: item,
+                sizes: sizes
+            })
+        });
+
+        let result = await response.json();
+
+        if(result.status === "success"){
+
+            alert("Item Saved");
+
+            closeItemPopup();
+
+            location.reload();
+        }
+    }
+
+    function toggleHistory(){
+        let historyDiv = document.querySelector(".history");
+
+        if(historyDiv.style.display === "none"){
+            historyDiv.style.display = "block";
+        } else {
+            historyDiv.style.display = "none";
+        }
+    }
+
+</script>
+    <div id="partyPopup"
+        style="
+            display:none;
+            position:fixed;
+            top:50%;
+            left:50%;
+            transform:translate(-50%,-50%);
+            background:white;
+            padding:20px;
+            width:350px;
+            border-radius:10px;
+            box-shadow:0 0 15px rgba(0,0,0,0.3);
+            z-index:9999;
+        ">
+
+        <h3>Add Party</h3>
+
+        <input type="text"
+            id="newPartyName"
+            placeholder="Party Name"
+            style="margin-bottom:10px;">
+
+        <input type="text"
+            id="newPartyAddress"
+            placeholder="Party Address"
+            style="margin-bottom:10px;">
+
+        <button type="button"
+                onclick="saveParty()"
+                style="background:#27ae60;">
+            Save
+        </button>
+
+        <button type="button"
+                onclick="closePartyPopup()"
+                style="background:#e74c3c;">
+            Close
+        </button>
+
+    </div>
+
+    <div id="clothPopup"
+        style="
+            display:none;
+            position:fixed;
+            top:50%;
+            left:50%;
+            transform:translate(-50%,-50%);
+            background:white;
+            padding:20px;
+            width:350px;
+            border-radius:10px;
+            box-shadow:0 0 15px rgba(0,0,0,0.3);
+            z-index:9999;
+        ">
+
+        <h3>Add Cloth</h3>
+
+        <input type="text"
+            id="newCloth"
+            placeholder="Cloth Name"
+            style="margin-bottom:10px;">
+
+        <button type="button"
+                onclick="saveCloth()"
+                style="background:#27ae60;">
+            Save
+        </button>
+
+        <button type="button"
+                onclick="closeClothPopup()"
+                style="background:#e74c3c;">
+            Close
+        </button>
+
+    </div>
+
+    <div id="schoolPopup"
+        style="
+            display:none;
+            position:fixed;
+            top:50%;
+            left:50%;
+            transform:translate(-50%,-50%);
+            background:white;
+            padding:20px;
+            width:350px;
+            border-radius:10px;
+            box-shadow:0 0 15px rgba(0,0,0,0.3);
+            z-index:9999;
+        ">
+
+        <h3>Add School</h3>
+
+        <input type="text"
+            id="newSchool"
+            placeholder="School Name"
+            style="margin-bottom:10px;">
+
+        <button type="button"
+                onclick="saveSchool()"
+                style="background:#27ae60;">
+            Save
+        </button>
+
+        <button type="button"
+                onclick="closeSchoolPopup()"
+                style="background:#e74c3c;">
+            Close
+        </button>
+
+    </div>
+
+    <div id="itemPopup"
+        style="
+            display:none;
+            position:fixed;
+            top:50%;
+            left:50%;
+            transform:translate(-50%,-50%);
+            background:white;
+            padding:20px;
+            width:350px;
+            border-radius:10px;
+            box-shadow:0 0 15px rgba(0,0,0,0.3);
+            z-index:9999;
+        ">
+
+        <h3>Add Item & Sizes</h3>
+
+        <input type="text"
+            id="newItem"
+            placeholder="Item Name"
+            style="margin-bottom:10px;">
+
+        <input type="text"
+            id="newSizes"
+            placeholder="Sizes Example: 28,30,32,34"
+            style="margin-bottom:10px;">
+
+        <button type="button"
+                onclick="saveItem()"
+                style="background:#27ae60;">
+            Save
+        </button>
+
+        <button type="button"
+                onclick="closeItemPopup()"
+                style="background:#e74c3c;">
+            Close
+        </button>
+
+    </div>
+
 </body>
 </html>

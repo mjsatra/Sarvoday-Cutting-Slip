@@ -67,5 +67,25 @@
     ],
     "total_qty": "15",
     "total_meter": "25.25"
+  },
+  {
+    "slip_no": "4",
+    "date": "07-05-2026",
+    "party": "TEST 1",
+    "address": "MUMBAI",
+    "cloth": "BROWN #",
+    "school": "BAL BHARTI",
+    "item": "HALF SUIT",
+    "sizes": [
+      "1"
+    ],
+    "qtys": [
+      "10"
+    ],
+    "meters": [
+      "10.25"
+    ],
+    "total_qty": "10",
+    "total_meter": "10.25"
   }
 ]

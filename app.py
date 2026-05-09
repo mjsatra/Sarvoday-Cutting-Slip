@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect
 import json
 import datetime
 import os
+from flask import jsonify
 
 app = Flask(__name__)
 
@@ -25,33 +26,55 @@ def save_history(data):
 from openpyxl import load_workbook
 
 def load_party_data():
-    file_path = os.path.join(BASE_DIR, "parties.xlsx")
+
+    file_path = os.path.join(BASE_DIR, "party_master.json")
+
     party_list = []
 
     if os.path.exists(file_path):
-        wb = load_workbook(file_path)
-        ws = wb.active
 
-        for row in ws.iter_rows(min_row=2, max_col=1, values_only=True):
-            if row[0]:
-                party_list.append(str(row[0]))
+        with open(file_path, "r") as f:
 
-    return party_list
+            try:
+                data = json.load(f)
 
+                for row in data:
+
+                    party = row.get("party", "").strip()
+
+                    if party:
+                        party_list.append(party)
+
+            except:
+                pass
+
+    return sorted(list(set(party_list)))
 
 def load_item_data():
-    file_path = os.path.join(BASE_DIR, "Item Name.xlsx")
-    items = set()
+
+    file_path = os.path.join(BASE_DIR, "item_master.json")
+
+    items = []
 
     if os.path.exists(file_path):
-        wb = load_workbook(file_path)
-        ws = wb.active
 
-        for row in ws.iter_rows(min_row=2, values_only=True):
-            if row and row[0]:
-                items.add(str(row[0]).strip())
+        with open(file_path, "r") as f:
 
-    return sorted(list(items))
+            try:
+
+                data = json.load(f)
+
+                for row in data:
+
+                    item = row.get("item", "").strip()
+
+                    if item:
+                        items.append(item)
+
+            except:
+                pass
+
+    return sorted(list(set(items)))
 
 def get_next_slip_no():
     history = load_history()
@@ -63,63 +86,91 @@ import pandas as pd
 
 def load_party_details():
 
-    file_path = os.path.join(BASE_DIR, "Master Data.xlsx")
+    file_path = os.path.join(BASE_DIR, "party_master.json")
 
     party_data = {}
-    school_list = []
+
+    school_file = os.path.join(BASE_DIR, "school_master.json")
+
+    if os.path.exists(school_file):
+
+        with open(school_file, "r") as f:
+
+            try:
+                school_list = json.load(f)
+
+            except:
+                school_list = []
+
     cloth_list = []
+
+    cloth_file = os.path.join(BASE_DIR, "cloth_master.json")
+
+    if os.path.exists(cloth_file):
+
+        with open(cloth_file, "r") as f:
+
+            try:
+                cloth_list = json.load(f)
+
+            except:
+                cloth_list = []
 
     if os.path.exists(file_path):
 
-        df = pd.read_excel(file_path)
+        with open(file_path, "r") as f:
 
-        for _, row in df.iterrows():
+            try:
 
-            party = str(row.get("Party Name", "")).strip()
-            address = str(row.get("Address", "")).strip()
-            school = str(row.get("School Name", "")).strip()
-            cloth = str(row.get("Cloth", "")).strip()
+                data = json.load(f)
 
-            # Party + Address
-            if party and party != "nan":
-                party_data[party] = address
+                for row in data:
 
-            # School List
-            if school and school != "nan":
-                if school not in school_list:
-                    school_list.append(school)
+                    party = str(
+                        row.get("party", "")
+                    ).strip()
 
-            # Cloth List
-            if cloth and cloth != "nan":
-                if cloth not in cloth_list:
-                    cloth_list.append(cloth)
+                    address = str(
+                        row.get("address", "")
+                    ).strip()
+
+                    if party:
+                        party_data[party] = address
+
+            except:
+                pass
 
     return {
         "party_data": party_data,
-        "school_list": sorted(school_list),
-        "cloth_list": sorted(cloth_list)
+        "school_list": school_list,
+        "cloth_list": cloth_list
     }
 
 def load_size_map():
-    file_path = os.path.join(BASE_DIR, "Item Name.xlsx")
+
+    file_path = os.path.join(BASE_DIR, "item_master.json")
+
     size_map = {}
 
     if os.path.exists(file_path):
-        wb = load_workbook(file_path)
-        ws = wb.active
 
-        for row in ws.iter_rows(min_row=2, values_only=True):
+        with open(file_path, "r") as f:
 
-            if not row or not row[0] or not row[1]:
-                continue
+            try:
 
-            item = str(row[0]).strip()   # Name
-            size = str(row[1]).strip()   # Size
+                data = json.load(f)
 
-            if item not in size_map:
-                size_map[item] = []
+                for row in data:
 
-            size_map[item].append(size)
+                    item = row.get("item", "").strip()
+
+                    sizes = row.get("sizes", [])
+
+                    if item:
+                        size_map[item] = sizes
+
+            except:
+                pass
 
     return size_map
 
@@ -183,7 +234,139 @@ def home():
         cloth_list=master_data["cloth_list"],
         size_map=size_map
     )
-    
+
+@app.route("/save_party", methods=["POST"])
+def save_party():
+
+    data = request.json
+
+    party_name = data.get("party")
+    address = data.get("address")
+
+    file_path = os.path.join(BASE_DIR, "party_master.json")
+
+    if os.path.exists(file_path):
+
+        with open(file_path, "r") as f:
+            parties = json.load(f)
+
+    else:
+        parties = []
+
+    parties.append({
+        "party": party_name,
+        "address": address
+    })
+
+    with open(file_path, "w") as f:
+        json.dump(parties, f, indent=2)
+
+    return jsonify({
+        "status": "success"
+    })   
+
+@app.route("/save_cloth", methods=["POST"])
+def save_cloth():
+
+    data = request.get_json()
+
+    cloth = data.get("cloth")
+
+    file_path = os.path.join(BASE_DIR, "cloth_master.json")
+
+    if os.path.exists(file_path):
+
+        with open(file_path, "r") as f:
+
+            try:
+                cloths = json.load(f)
+
+            except:
+                cloths = []
+
+    else:
+        cloths = []
+
+    cloths.append(cloth)
+
+    with open(file_path, "w") as f:
+        json.dump(cloths, f, indent=2)
+
+    return jsonify({
+        "status":"success"
+    })
+
+@app.route("/save_school", methods=["POST"])
+def save_school():
+
+    data = request.get_json()
+
+    school = data.get("school")
+
+    file_path = os.path.join(BASE_DIR, "school_master.json")
+
+    if os.path.exists(file_path):
+
+        with open(file_path, "r") as f:
+
+            try:
+                schools = json.load(f)
+
+            except:
+                schools = []
+
+    else:
+        schools = []
+
+    schools.append(school)
+
+    with open(file_path, "w") as f:
+        json.dump(schools, f, indent=2)
+
+    return jsonify({
+        "status":"success"
+    })
+
+@app.route("/save_item", methods=["POST"])
+def save_item():
+
+    data = request.get_json()
+
+    item = data.get("item")
+
+    sizes = data.get("sizes")
+
+    size_list = [
+        s.strip() for s in sizes.split(",")
+        if s.strip()
+    ]
+
+    file_path = os.path.join(BASE_DIR, "item_master.json")
+
+    if os.path.exists(file_path):
+
+        with open(file_path, "r") as f:
+
+            try:
+                items = json.load(f)
+
+            except:
+                items = []
+
+    else:
+        items = []
+
+    items.append({
+        "item": item,
+        "sizes": size_list
+    })
+
+    with open(file_path, "w") as f:
+        json.dump(items, f, indent=2)
+
+    return jsonify({
+        "status":"success"
+    })
 
 if __name__ == "__main__":
     app.run(debug=True)
